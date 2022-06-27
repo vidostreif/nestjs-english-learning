@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+  // previewFeatures = ["orderByRelation"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Dictionary {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  markers   Marker[]
+
+  @@map("dictionaries")
+}
+
+model Marker {
+  id           Int         @id @default(autoincrement())
+  top          Int         @db.SmallInt
+  left         Int         @db.SmallInt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  taskId       Int?
+  dictionaryId Int?
+  dictionary   Dictionary? @relation(fields: [dictionaryId], references: [id])
+  task         Task?       @relation(fields: [taskId], references: [id])
+
+  @@map("markers")
+}
+
+model TaskRating {
+  rating Int
+  userId Int
+  taskId Int
+  id     Int  @default(autoincrement())
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, taskId])
+  @@map("taskRatings")
+}
+
+model Task {
+  id             Int          @id @default(autoincrement())
+  imgUrl         String       @db.VarChar(255)
+  numberOfPasses Int?         @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  complexity     Int?         @default(0)
+  deleted        Boolean      @default(false)
+  markers        Marker[]
+  taskRatings    TaskRating[]
+
+  @@map("tasks")
+}
+
+model Token {
+  id           Int      @id @default(autoincrement())
+  refreshToken String   @db.VarChar(1020)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       Int?
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@map("tokens")
+}
+
+model UserRole {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+  users     User[]
+
+  @@map("userRoles")
+}
+
+model User {
+  id             Int          @id @default(autoincrement())
+  name           String?      @db.VarChar(255)
+  email          String       @unique @db.VarChar(255)
+  password       String       @db.VarChar(255)
+  isActivated    Boolean      @default(false)
+  activationLink String?      @db.VarChar(255)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deleted        Boolean      @default(false)
+  userRoleId     Int?
+  userRole       UserRole?    @relation(fields: [userRoleId], references: [id])
+  taskRatings    TaskRating[]
+  tokens         Token[]
+
+  @@map("users")
+}
