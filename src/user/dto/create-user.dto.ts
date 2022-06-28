@@ -19,8 +19,8 @@ export class CreateUserDto {
   })
   email: string;
 
-  @Length(8, 30, {
-    message: 'Пароль должен быть от 8 до 30 символов',
+  @Length(8, 32, {
+    message: 'Пароль должен быть от 8 до 32 символов',
   })
   @IsHasUppercase()
   password: string;

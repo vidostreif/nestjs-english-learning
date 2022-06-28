@@ -1,11 +1,15 @@
 // import { UserRole, User as UserPrisma } from '@prisma/client';
 // import { Exclude } from 'class-transformer';
-import { UserIncludeRole } from 'prisma/prisma';
+import { UserIncludeRole } from 'src/prisma/prisma.dto';
 
-export class User implements UserIncludeRole {
+export class UserWithTokens implements UserIncludeRole {
   id: number;
   name: string;
   email: string;
   isActivated: boolean;
   userRole: { name: string };
+
+  lifetimeAccessToken: number;
+  accessToken: string;
+  refreshToken: string;
 }

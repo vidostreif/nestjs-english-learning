@@ -11,7 +11,7 @@ const userIncludeRole = Prisma.validator<Prisma.UserArgs>()({
   },
 });
 
-type UserForDTO = Prisma.UserGetPayload<typeof userForDTO>;
+type UserIncludeRole = Prisma.UserGetPayload<typeof userIncludeRole>;
 
 // определяем какие вложенные объекты будем получать
 const markerIncludeDictionary = Prisma.validator<Prisma.MarkerArgs>()({
@@ -36,6 +36,9 @@ type TaskIncludeMarkersIncludeDictionary = Prisma.TaskGetPayload<
   typeof taskIncludeMarkersIncludeDictionary
 >;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+type TokenDTO = Prisma.TokenGetPayload<{}>;
+
 // type TaskWithMessages = Prisma.TaskGetPayload<{
 //   include: {
 //     markers: {
@@ -53,4 +56,5 @@ export {
   MarkersIncludeDictionary,
   taskIncludeMarkersIncludeDictionary,
   TaskIncludeMarkersIncludeDictionary,
+  TokenDTO,
 };
