@@ -3,9 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppService } from './app.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { getMailConfig } from './configs/mail.config';
-import { TokenModule } from './token/token.module';
+import { TokensModule } from './tokens/tokens.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UserModule } from './user/user.module';
+import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -16,8 +16,8 @@ import { AppController } from './app.controller';
       inject: [ConfigService],
       useFactory: getMailConfig,
     }),
-    TokenModule,
-    UserModule,
+    TokensModule,
+    UsersModule,
     PrismaModule,
   ],
   controllers: [AppController],

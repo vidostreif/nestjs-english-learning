@@ -12,15 +12,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserWithTokens } from './entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
-import { TokenService } from 'src/token/token.service';
+import { TokensService } from 'src/tokens/tokens.service';
 import { UserIncludeRole, userIncludeRole } from '../prisma/prisma.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     private readonly mailerService: MailerService,
-    private readonly tokenService: TokenService,
+    private readonly tokenService: TokensService,
     private prismaClient: PrismaService,
   ) {}
 
@@ -72,8 +72,8 @@ export class UserService {
     };
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return await this.prismaClient.user.findMany({ ...userIncludeRole });
   }
 
   findOne(id: number) {
@@ -86,6 +86,25 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  //активация пользователя
+  async activate(activationLink: string) {
+    const user = await this.prismaClient.user.findFirst({
+      where: { activationLink },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        `Некорректная ссылка активации`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.prismaClient.user.update({
+      where: user,
+      data: { isActivated: true },
+    });
   }
 
   async login(email: string, password: string) {
@@ -115,13 +134,13 @@ export class UserService {
     };
   }
 
-  async getNewToken(user: UserIncludeRole) {
+  private async getNewToken(user: UserIncludeRole) {
     const tokens = this.tokenService.generateTokens(user);
     await this.tokenService.saveToken(user.id, tokens.refreshToken);
     return tokens;
   }
 
-  async sendConfirmMail(user: UserIncludeRole, activationLink: string) {
+  private async sendConfirmMail(user: UserIncludeRole, activationLink: string) {
     const urlConfirmAddress = `${process.env.API_URL}/api/user/activate/${activationLink}`;
     // Отправка почты
     return await this.mailerService
