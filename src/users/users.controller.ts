@@ -8,11 +8,12 @@ import {
   Delete,
   Res,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../tokens/jwt-auth.guard';
 
 const maxAge = 2592000000; // один месяц
@@ -40,20 +41,20 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.userService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.userService.update(+id, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.userService.remove(+id);
   }
 
   @Post('login')
@@ -70,10 +71,34 @@ export class UsersController {
     return res.json(userData);
   }
 
+  @Post('logout')
+  async logout(
+    @Body() body: { email: string; password: string },
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const { refreshToken } = req.cookies;
+    const token = await this.userService.logout(refreshToken);
+    res.clearCookie('refreshToken');
+
+    return res.json(token);
+  }
+
   @Get('activate/:link')
   async activate(@Param('link') link: string, @Res() res: Response) {
     await this.userService.activate(link);
     return res.redirect(process.env.CLIENT_URL);
+  }
+
+  @Get('refresh')
+  async refresh(@Res() res: Response, @Req() req: Request) {
+    const { refreshToken } = req.cookies;
+    const userData = await this.userService.refresh(refreshToken);
+    res.cookie('refreshToken', userData.refreshToken, {
+      maxAge,
+      httpOnly: true,
+    });
+    return res.json(userData);
   }
 
   // { passthrough: true }

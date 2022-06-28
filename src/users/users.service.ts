@@ -68,28 +68,42 @@ export class UsersService {
     return {
       ...tokens,
       lifetimeAccessToken: this.tokenService.lifetimeAccessToken,
-      ...user,
+      user,
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<UserIncludeRole[]> {
     return await this.prismaClient.user.findMany({ ...userIncludeRole });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number): Promise<UserIncludeRole> {
+    return await this.prismaClient.user.findFirst({
+      where: { id },
+      ...userIncludeRole,
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserIncludeRole> {
+    return await this.prismaClient.user.update({
+      where: { id },
+      data: updateUserDto,
+      ...userIncludeRole,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<UserIncludeRole> {
+    return await this.prismaClient.user.update({
+      where: { id },
+      data: { deleted: true },
+      ...userIncludeRole,
+    });
   }
 
   //активация пользователя
-  async activate(activationLink: string) {
+  async activate(activationLink: string): Promise<UserIncludeRole> {
     const user = await this.prismaClient.user.findFirst({
       where: { activationLink },
     });
@@ -101,13 +115,14 @@ export class UsersService {
       );
     }
 
-    await this.prismaClient.user.update({
+    return await this.prismaClient.user.update({
       where: user,
       data: { isActivated: true },
+      ...userIncludeRole,
     });
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<UserWithTokens> {
     const user = await this.prismaClient.user.findFirst({
       where: { email },
       select: { ...userIncludeRole.select, password: true },
@@ -125,6 +140,48 @@ export class UsersService {
     }
 
     delete user.password;
+    const tokens = await this.getNewToken(user);
+
+    return {
+      ...tokens,
+      lifetimeAccessToken: this.tokenService.lifetimeAccessToken,
+      user,
+    };
+  }
+
+  async logout(refreshToken: string) {
+    const token = await this.tokenService.removeToken(refreshToken);
+    return token;
+  }
+
+  async refresh(refreshToken: string): Promise<UserWithTokens> {
+    if (!refreshToken) {
+      throw new UnauthorizedException({
+        message: `В cookie нет токена`,
+      });
+    }
+
+    const userData: UserIncludeRole = this.tokenService.validateRefreshToken(
+      refreshToken,
+    ) as UserIncludeRole;
+    if (!userData) {
+      throw new UnauthorizedException({
+        message: `Не удалось расшифровать токен`,
+      });
+    }
+
+    const tokenFromDb = await this.tokenService.findToken(refreshToken);
+    if (!tokenFromDb) {
+      throw new UnauthorizedException({
+        message: `Переданный токен не найден в bd`,
+      });
+    }
+
+    const user = await this.prismaClient.user.findFirst({
+      where: { id: userData.id },
+      ...userIncludeRole,
+    });
+
     const tokens = await this.getNewToken(user);
 
     return {
