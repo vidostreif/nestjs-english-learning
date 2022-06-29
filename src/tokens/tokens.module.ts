@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { IsAuthorized } from './isAuthorized.guard';
 import { TokensService } from './tokens.service';
 
 @Module({
-  providers: [TokensService, JwtAuthGuard],
+  providers: [TokensService, IsAuthorized],
   imports: [
     JwtModule.register({
       // secret: process.env.JWT_ACCESS_SECRET,
@@ -13,6 +13,6 @@ import { TokensService } from './tokens.service';
     }),
     PrismaModule,
   ],
-  exports: [TokensService, JwtAuthGuard],
+  exports: [TokensService, IsAuthorized],
 })
 export class TokensModule {}

@@ -14,7 +14,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from '../tokens/jwt-auth.guard';
+import { Roles } from '../tokens/rolesAuth.decorator';
+import { AuthorizationGuard } from '../tokens/authorization.guard';
 
 const maxAge = 2592000000; // один месяц
 
@@ -33,25 +34,29 @@ export class UsersController {
     return res.json(userData);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('administrator')
+  @UseGuards(AuthorizationGuard)
   @Get()
   async findAll() {
     return await this.userService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('administrator')
+  @UseGuards(AuthorizationGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.userService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('administrator')
+  @UseGuards(AuthorizationGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(+id, updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('administrator')
+  @UseGuards(AuthorizationGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.userService.remove(+id);
