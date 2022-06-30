@@ -8,12 +8,12 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { UserIncludeRole } from '../prisma/prisma.dto';
 import { ROLES_KEY } from './rolesAuth.decorator';
-import { TokensService } from './tokens.service';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(
-    private tokenService: TokensService,
+    private tokenService: AuthService,
     private reflector: Reflector,
   ) {}
 

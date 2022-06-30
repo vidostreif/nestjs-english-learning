@@ -15,7 +15,7 @@ import {
 } from './entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
-import { TokensService } from 'src/tokens/tokens.service';
+import { AuthService } from 'src/auth/auth.service';
 import { UserIncludeRole, userIncludeRole } from '../prisma/prisma.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -23,7 +23,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsersService {
   constructor(
     private readonly mailerService: MailerService,
-    private readonly tokenService: TokensService,
+    private readonly tokenService: AuthService,
     private prismaClient: PrismaService,
   ) {}
 

@@ -14,8 +14,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Request, Response } from 'express';
-import { Roles } from '../tokens/rolesAuth.decorator';
-import { AuthorizationGuard } from '../tokens/authorization.guard';
+import { Roles } from '../auth/rolesAuth.decorator';
+import { AuthorizationGuard } from '../auth/authorization.guard';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   UserIncludeRoleEntity,

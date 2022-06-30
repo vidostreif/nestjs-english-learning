@@ -4,7 +4,7 @@ import { TokenDTO } from 'src/prisma/prisma.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class TokensService {
+export class AuthService {
   lifetimeAccessToken = 1800; //30 минут в секундах
   lifetimeRefreshToken = '30d'; //30 дней
 
