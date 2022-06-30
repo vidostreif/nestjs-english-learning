@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -23,12 +24,14 @@ import {
   ApiOperation,
   ApiParam,
   ApiProperty,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { TaskEntity } from './entities/task.entity';
-import { Roles } from '../tokens/rolesAuth.decorator';
-import { AuthorizationGuard } from '../tokens/authorization.guard';
+import { Roles } from '../auth/rolesAuth.decorator';
+import { AuthorizationGuard } from '../auth/authorization.guard';
+import { GetTasksQuery } from './query/getTasksQuery';
 
 @ApiTags('api/task')
 @Controller('/api/task')
@@ -37,8 +40,8 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Создать или обновить задание' })
   @ApiResponse({ status: 200, type: TaskEntity })
-  // @Roles('administrator')
-  // @UseGuards(AuthorizationGuard)
+  @Roles('administrator')
+  @UseGuards(AuthorizationGuard)
   @Post()
   @UseInterceptors(FileInterceptor('img'))
   // @UseInterceptors(ClassSerializerInterceptor)
@@ -66,16 +69,17 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Получить список заданий по параметрам' })
   @ApiResponse({ status: 200, type: [TaskEntity] })
+  // @ApiQuery({ type: GetTasksQuery })
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  findAll(@Query() queryParams: GetTasksQuery) {
+    return this.tasksService.findAll(queryParams);
   }
 
   @ApiOperation({ summary: 'Получить задание по id' })
   @ApiResponse({ status: 200, type: TaskEntity })
   @ApiParam({
     name: 'id',
-    type: String,
+    type: Number,
     description: 'Id задания',
     example: '1',
   })
@@ -91,8 +95,8 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Пометит задание на удаление' })
   @ApiResponse({ status: 200, type: TaskEntity })
-  @Roles('administrator')
-  @UseGuards(AuthorizationGuard)
+  // @Roles('administrator')
+  // @UseGuards(AuthorizationGuard)
   @ApiParam({
     name: 'id',
     type: String,

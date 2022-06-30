@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
+import { GetTasksQuery, sortEnum } from './query/getTasksQuery';
 
 @Injectable()
 export class TasksService {
@@ -101,8 +102,89 @@ export class TasksService {
     });
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async findAll({
+    limit,
+    page,
+    complexity,
+    sort,
+  }: GetTasksQuery): Promise<TaskEntity[]> {
+    // let { limit, page, complexity, sort } = params;
+
+    // limit = limit || 10;
+    // page = page || 1;
+    const offset = limit * (page - 1);
+
+    const filter: any = {};
+    if (complexity) {
+      filter.where = {
+        complexity: Array.isArray(complexity) ? { in: complexity } : complexity,
+      };
+    }
+
+    let order = { field: 'id', order: 'ASC' };
+    if (sort) {
+      switch (sort) {
+        case sortEnum.newFirst:
+          order = { field: `"task"."createdAt"`, order: 'DESC' };
+          break;
+        case sortEnum.popularFirst:
+          order = { field: `"task"."numberOfPasses"`, order: 'DESC' };
+          break;
+        case sortEnum.hardFirst:
+          order = { field: `"task"."complexity"`, order: 'DESC' };
+          break;
+        case sortEnum.easyFirst:
+          order = { field: `"task"."complexity"`, order: 'ASC' };
+          break;
+        case sortEnum.highlyRatedFirst:
+          order = { field: 'rating', order: 'DESC' };
+          break;
+        case sortEnum.lowRatedFirst:
+          order = { field: 'rating', order: 'ASC' };
+          break;
+        default:
+        // throw new Error('Неудалось определить сортировку по значению: ' + sort)
+      }
+    }
+
+    const resu: any = {};
+
+    resu.count = await this.prismaClient.task.count({ ...filter });
+
+    resu.currentPage = page;
+    resu.totalPages = Math.ceil(resu.count / limit); // всего страниц
+
+    //Подготавливаем данные для фильтрации в запросе
+    let WHERE = '';
+    if (filter.where) {
+      const whereArr = [];
+      for (const key in filter.where) {
+        // если фильтруем значениями из массива
+        if (filter.where[key].in) {
+          whereArr.push(key + ' in (' + filter.where[key].in.join(', ') + ')');
+        } else {
+          whereArr.push(key + '=' + filter.where[key]);
+        }
+      }
+      WHERE = 'WHERE ' + whereArr.join(' AND ');
+    }
+
+    resu.tasks = await this.prismaClient.$queryRawUnsafe(`SELECT "task"."id",
+      "task"."imgUrl",
+      "task"."numberOfPasses",
+      "task"."complexity",
+      "task"."createdAt",
+      "task"."updatedAt",
+      AVG("taskRatings"."rating") AS "rating"
+      FROM "tasks" AS "task"
+        LEFT OUTER JOIN "taskRatings" AS "taskRatings" ON "task"."id" = "taskRatings"."taskId" 
+      ${WHERE}
+      GROUP BY "task"."id"
+      ORDER BY ${order.field} ${order.order}, "task"."id" ASC
+      LIMIT ${limit} 
+      OFFSET ${offset};`);
+
+    return resu;
   }
 
   findOne(id: number) {
