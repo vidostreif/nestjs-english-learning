@@ -9,7 +9,10 @@ import { v4 } from 'uuid';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserWithTokens } from './entities/user.entity';
+import {
+  UserIncludeRoleEntity,
+  UserWithTokensEntity,
+} from './entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { TokensService } from 'src/tokens/tokens.service';
@@ -24,7 +27,7 @@ export class UsersService {
     private prismaClient: PrismaService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserWithTokens> {
+  async create(createUserDto: CreateUserDto): Promise<UserWithTokensEntity> {
     const { email, password, name } = createUserDto;
     //регистрация нового пользователя
     const candidate = await this.prismaClient.user.findFirst({
@@ -72,11 +75,11 @@ export class UsersService {
     };
   }
 
-  async findAll(): Promise<UserIncludeRole[]> {
+  async findAll(): Promise<UserIncludeRoleEntity[]> {
     return await this.prismaClient.user.findMany({ ...userIncludeRole });
   }
 
-  async findOne(id: number): Promise<UserIncludeRole> {
+  async findOne(id: number): Promise<UserIncludeRoleEntity> {
     return await this.prismaClient.user.findFirst({
       where: { id },
       ...userIncludeRole,
@@ -86,7 +89,7 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserIncludeRole> {
+  ): Promise<UserIncludeRoleEntity> {
     return await this.prismaClient.user.update({
       where: { id },
       data: updateUserDto,
@@ -94,7 +97,7 @@ export class UsersService {
     });
   }
 
-  async remove(id: number): Promise<UserIncludeRole> {
+  async remove(id: number): Promise<UserIncludeRoleEntity> {
     return await this.prismaClient.user.update({
       where: { id },
       data: { deleted: true },
@@ -103,7 +106,7 @@ export class UsersService {
   }
 
   //активация пользователя
-  async activate(activationLink: string): Promise<UserIncludeRole> {
+  async activate(activationLink: string): Promise<UserIncludeRoleEntity> {
     const user = await this.prismaClient.user.findFirst({
       where: { activationLink },
     });
@@ -122,7 +125,7 @@ export class UsersService {
     });
   }
 
-  async login(email: string, password: string): Promise<UserWithTokens> {
+  async login(email: string, password: string): Promise<UserWithTokensEntity> {
     const user = await this.prismaClient.user.findFirst({
       where: { email },
       select: { ...userIncludeRole.select, password: true },
@@ -154,7 +157,7 @@ export class UsersService {
     return token;
   }
 
-  async refresh(refreshToken: string): Promise<UserWithTokens> {
+  async refresh(refreshToken: string): Promise<UserWithTokensEntity> {
     if (!refreshToken) {
       throw new UnauthorizedException({
         message: `В cookie нет токена`,

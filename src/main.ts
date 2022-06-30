@@ -1,13 +1,34 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+
+  const config = new DocumentBuilder()
+    .setTitle('OkeyKitty')
+    .setDescription('API документация')
+    .setVersion('1.0')
+    .addTag('OkeyKitty')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  app.enableCors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  });
+
   app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe());
+
+  // конвертация и проверка входящий данных
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  // Для использования @Exclude()
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
   await app.listen(80);
 }
 bootstrap();

@@ -7,6 +7,9 @@ import { TokensModule } from './tokens/tokens.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
+import { TasksModule } from './tasks/tasks.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -16,9 +19,13 @@ import { AppController } from './app.controller';
       inject: [ConfigService],
       useFactory: getMailConfig,
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../..', 'Client'),
+    }),
     TokensModule,
     UsersModule,
     PrismaModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
