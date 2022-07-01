@@ -55,7 +55,7 @@ export class UsersController {
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
   @ApiParam({
     name: 'id',
-    type: String,
+    type: Number,
     description: 'Id пользователя',
     example: '1',
   })
@@ -70,7 +70,7 @@ export class UsersController {
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
   @ApiParam({
     name: 'id',
-    type: String,
+    type: Number,
     description: 'Id пользователя',
     example: '1',
   })
@@ -85,7 +85,7 @@ export class UsersController {
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
   @ApiParam({
     name: 'id',
-    type: String,
+    type: Number,
     description: 'Id пользователя',
     example: '1',
   })

@@ -4,15 +4,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as sharp from 'sharp';
 import {
-  MarkersIncludeDictionary,
   TaskIncludeMarkersIncludeDictionary,
   taskIncludeMarkersIncludeDictionary,
 } from '../prisma/prisma.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskEntity } from './entities/task.entity';
 import { GetTasksQuery, sortEnum } from './query/getTasksQuery';
+import { GetRandomTasksQuery } from './query/getRandomTasksQuery';
 
 @Injectable()
 export class TasksService {
@@ -22,7 +20,7 @@ export class TasksService {
     userId: number,
     file: Express.Multer.File,
     createTaskDto: CreateTaskDto,
-  ): Promise<TaskEntity> {
+  ): Promise<TaskIncludeMarkersIncludeDictionary> {
     const { complexity, markers } = createTaskDto;
     let { id } = createTaskDto;
 
@@ -102,16 +100,7 @@ export class TasksService {
     });
   }
 
-  async findAll({
-    limit,
-    page,
-    complexity,
-    sort,
-  }: GetTasksQuery): Promise<TaskEntity[]> {
-    // let { limit, page, complexity, sort } = params;
-
-    // limit = limit || 10;
-    // page = page || 1;
+  async findAll({ limit, page, complexity, sort }: GetTasksQuery) {
     const offset = limit * (page - 1);
 
     const filter: any = {};
@@ -187,16 +176,73 @@ export class TasksService {
     return resu;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findRandom({ limit, not_id }: GetRandomTasksQuery) {
+    // const limit = count ? count : 1;
+    let WHERE = '';
+    if (not_id) {
+      WHERE = `WHERE "task"."id" != ${not_id}`;
+    }
+
+    const resu = await this.prismaClient.$queryRawUnsafe(`
+        SELECT 
+          "task"."id",
+          "task"."imgUrl",
+          "task"."numberOfPasses",
+          "task"."complexity",
+          "task"."createdAt",
+          "task"."updatedAt"
+        FROM "tasks" AS "task"
+        ${WHERE}
+        ORDER BY random()
+        LIMIT ${limit};`);
+
+    return resu;
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async findOne(id: number): Promise<TaskIncludeMarkersIncludeDictionary> {
+    if (!id) {
+      throw new Error('Не задан ID');
+    }
+
+    const resu = await this.prismaClient.task.findFirst({
+      where: {
+        id,
+      },
+      include: { markers: { include: { dictionary: true } } },
+    });
+
+    return resu;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: number) {
+    if (!id) {
+      throw new Error('Не задан ID');
+    }
+
+    await this.prismaClient.task.update({
+      where: {
+        id,
+      },
+      data: {
+        deleted: true,
+      },
+    });
+
+    return 'Задание помечено на удаление';
+  }
+
+  // увеличение счетчика прохождения задания
+  async wasPassed(id: number) {
+    if (!id) {
+      throw new Error('Не задан ID задания');
+    }
+
+    await this.prismaClient.task.update({
+      where: { id },
+      data: { numberOfPasses: { increment: 1 } },
+    });
+
+    return 'Количество прохождений увеличено';
   }
 
   // сохранение новой картинки

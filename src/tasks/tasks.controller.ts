@@ -14,24 +14,22 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  ApiOperation,
-  ApiParam,
-  ApiProperty,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { TaskEntity } from './entities/task.entity';
+  TaskIncludeMarkersIncludeDictionaryEntity,
+  TaskIncludeRatingEntity,
+} from './entities/task.entity';
 import { Roles } from '../auth/rolesAuth.decorator';
 import { AuthorizationGuard } from '../auth/authorization.guard';
 import { GetTasksQuery } from './query/getTasksQuery';
+import { GetRandomTasksQuery } from './query/getRandomTasksQuery';
+import { GetOneTaskParam } from './query/getOneTaskParam';
 
 @ApiTags('api/task')
 @Controller('/api/task')
@@ -39,72 +37,100 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @ApiOperation({ summary: 'Создать или обновить задание' })
-  @ApiResponse({ status: 200, type: TaskEntity })
+  @ApiResponse({ status: 200, type: TaskIncludeMarkersIncludeDictionaryEntity })
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
-  @Post()
   @UseInterceptors(FileInterceptor('img'))
-  // @UseInterceptors(ClassSerializerInterceptor)
+  @Post()
   async create(
     @Body() createTaskDto: CreateTaskDto,
     @UploadedFile()
     file: Express.Multer.File,
-    // @Res()
-    // res: Response,
-    // @Req() req: Request,
-  ): Promise<TaskEntity> {
-    //!!! заменить на req.user.id
-    const userId = 1;
+    @Req() req: Request,
+  ): Promise<TaskIncludeMarkersIncludeDictionaryEntity> {
+    const userId = req.user.id;
 
-    console.log(createTaskDto);
-
-    const task = new TaskEntity(
+    return new TaskIncludeMarkersIncludeDictionaryEntity(
       await this.tasksService.createOrUpdate(+userId, file, createTaskDto),
     );
-    // res.json(task);
-    return task;
-
-    // return await this.tasksService.createOrUpdate(+userId, file, createTaskDto);
   }
 
   @ApiOperation({ summary: 'Получить список заданий по параметрам' })
-  @ApiResponse({ status: 200, type: [TaskEntity] })
-  // @ApiQuery({ type: GetTasksQuery })
+  @ApiResponse({
+    status: 200,
+    type: [TaskIncludeRatingEntity],
+  })
   @Get()
-  findAll(@Query() queryParams: GetTasksQuery) {
-    return this.tasksService.findAll(queryParams);
+  async findAll(@Query() queryParams: GetTasksQuery) {
+    return new TaskIncludeRatingEntity(
+      await this.tasksService.findAll(queryParams),
+    );
+  }
+
+  @ApiOperation({ summary: 'Получить случайный список заданий' })
+  @ApiResponse({
+    status: 200,
+    type: [TaskIncludeRatingEntity],
+  })
+  @Get('/random')
+  async findRandom(@Query() queryParams: GetRandomTasksQuery) {
+    return new TaskIncludeRatingEntity(
+      await this.tasksService.findRandom(queryParams),
+    );
   }
 
   @ApiOperation({ summary: 'Получить задание по id' })
-  @ApiResponse({ status: 200, type: TaskEntity })
-  @ApiParam({
-    name: 'id',
-    type: Number,
-    description: 'Id задания',
-    example: '1',
-  })
+  @ApiResponse({ status: 200, type: TaskIncludeMarkersIncludeDictionaryEntity })
+  // @ApiParam({
+  //   name: 'id',
+  //   type: Number,
+  //   description: 'Id задания',
+  //   example: '1',
+  // })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+  async findOne(@Param() params: GetOneTaskParam) {
+    return new TaskIncludeMarkersIncludeDictionaryEntity(
+      await this.tasksService.findOne(params.id),
+    );
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-  //   return this.tasksService.update(+id, updateTaskDto);
-  // }
-
   @ApiOperation({ summary: 'Пометит задание на удаление' })
-  @ApiResponse({ status: 200, type: TaskEntity })
-  // @Roles('administrator')
-  // @UseGuards(AuthorizationGuard)
+  @ApiResponse({ status: 200, type: TaskIncludeMarkersIncludeDictionaryEntity })
   @ApiParam({
     name: 'id',
     type: String,
     description: 'Id задания',
     example: '1',
   })
+  // @Roles('administrator')
+  // @UseGuards(AuthorizationGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.remove(id);
+  }
+
+  @ApiOperation({ summary: 'Увеличить счетчик прохождений' })
+  @ApiResponse({ status: 200, type: String })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Id задания',
+    example: '1',
+  })
+  // @Roles('administrator')
+  // @UseGuards(AuthorizationGuard)
+  @Patch('/passed/:id')
+  async wasPassed(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        exceptionFactory(error) {
+          return error;
+        },
+      }),
+    )
+    id: number,
+  ) {
+    return await this.tasksService.wasPassed(id);
   }
 }

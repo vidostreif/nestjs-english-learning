@@ -10,7 +10,6 @@ const userIncludeRole = Prisma.validator<Prisma.UserArgs>()({
     userRole: { select: { name: true } },
   },
 });
-
 type UserIncludeRole = Prisma.UserGetPayload<typeof userIncludeRole>;
 
 // определяем какие вложенные объекты будем получать

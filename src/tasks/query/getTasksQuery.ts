@@ -1,6 +1,6 @@
-import { ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 const default_limit = 10;
 const default_page = 1;
@@ -52,6 +52,7 @@ export class GetTasksQuery {
     example: '3',
     description: 'Сложность',
     type: Number,
+    // oneOf: [{ type: 'Number' }, { type: 'Number[]' }],
     required: false,
     minimum: 1,
     maximum: 5,
