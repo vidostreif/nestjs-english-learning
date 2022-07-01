@@ -12,6 +12,16 @@ async function bootstrap() {
     .setDescription('API документация')
     .setVersion('1.0')
     .addTag('OkeyKitty')
+    .addCookieAuth(
+      'authCookie',
+      {
+        type: 'http',
+        in: 'Header',
+        scheme: 'Bearer',
+      },
+      'refreshToken',
+    )
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
@@ -27,7 +37,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // Для использования @Exclude()
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.listen(80);
 }

@@ -43,14 +43,6 @@ export class TaskEntity implements Task {
 
   @Exclude()
   deleted: boolean;
-
-  // @ApiProperty({
-  //   example: '75',
-  //   description: 'Рейтинг задания',
-  //   minimum: 0,
-  //   maximum: 100,
-  // })
-  // rating: number;
 }
 
 export class DictionaryEntity implements Dictionary {
@@ -108,10 +100,6 @@ export class TaskIncludeMarkersIncludeDictionaryEntity
     delete partial.markers;
     Object.assign(this, partial);
   }
-
-  // @ApiHideProperty()
-  // @Exclude()
-  // rating: number;
 
   @ApiProperty({ type: [MarkerIncludeDictionaryEntity] })
   markers: MarkerIncludeDictionaryEntity[];

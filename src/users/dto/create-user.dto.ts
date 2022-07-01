@@ -1,13 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole, User } from '@prisma/client';
-// import { Exclude } from 'class-transformer';
 import { IsEmail, IsOptional, Length } from 'class-validator';
 import { IsHasUppercase } from 'src/validators/isHasUppercase';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'иван', description: 'Наименование пользователя' })
   @IsOptional()
-  name: string | null;
+  name!: string | null;
 
   @ApiProperty({
     example: 'ivan@mail.ru',

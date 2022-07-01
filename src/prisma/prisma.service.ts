@@ -59,11 +59,11 @@ export class PrismaService
       return next(params);
     });
 
-    this.$on<any>('query', (event: Prisma.QueryEvent) => {
-      console.dir('params: ' + event.params);
-      console.log('Query: ' + event.query);
-      console.log('Duration: ' + event.duration + 'ms');
-    });
+    // this.$on<any>('query', (event: Prisma.QueryEvent) => {
+    //   console.dir('params: ' + event.params);
+    //   console.log('Query: ' + event.query);
+    //   console.log('Duration: ' + event.duration + 'ms');
+    // });
     await this.$connect();
   }
 

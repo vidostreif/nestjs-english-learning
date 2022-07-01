@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, Min } from 'class-validator';
 
-export class GetOneTaskParam {
+export class IdUserParam {
   @ApiProperty({
     name: 'id',
-    description: 'Id задания',
+    description: 'Id пользователя',
     example: '1',
   })
   @Type(() => Number)

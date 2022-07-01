@@ -4,6 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserIncludeRole } from 'src/prisma/prisma.dto';
 
 export class UserIncludeRoleEntity implements UserIncludeRole {
+  constructor(partial: Partial<UserIncludeRoleEntity>) {
+    Object.assign(this, partial);
+  }
+
   @ApiProperty({ example: '1', description: 'Id ползователя' })
   id: number;
   @ApiProperty({ example: 'Иван', description: 'Наименование пользователя' })
@@ -27,6 +31,12 @@ export class UserIncludeRoleEntity implements UserIncludeRole {
 }
 
 export class UserWithTokensEntity {
+  constructor(partial: Partial<UserWithTokensEntity>) {
+    this.user = new UserIncludeRoleEntity(partial.user);
+    delete partial.user;
+    Object.assign(this, partial);
+  }
+
   @ApiProperty()
   user: UserIncludeRoleEntity;
   @ApiProperty({ example: '1800', description: 'Время жизни токена доступа' })
