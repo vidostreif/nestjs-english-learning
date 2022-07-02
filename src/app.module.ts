@@ -20,8 +20,16 @@ import { TaskRatingModule } from './task-rating/task-rating.module';
       inject: [ConfigService],
       useFactory: getMailConfig,
     }),
+
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../..', 'Client'),
+      rootPath: join(__dirname, '../../..', 'Client/build'),
+      exclude: ['/api*', '/static*'],
+    }),
+
+    ServeStaticModule.forRoot({
+      serveRoot: '/static',
+      rootPath: join(__dirname, '../..', 'static'),
+      exclude: ['/api*'],
     }),
     AuthModule,
     UsersModule,
