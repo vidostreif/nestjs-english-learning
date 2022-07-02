@@ -6,26 +6,21 @@ import {
   Patch,
   Param,
   Delete,
-  Res,
   Req,
   UploadedFile,
-  UploadedFiles,
   UseInterceptors,
   ClassSerializerInterceptor,
   UseGuards,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiConsumes,
   ApiOperation,
-  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -39,31 +34,7 @@ import { GetTasksQuery } from './query/getTasksQuery';
 import { GetRandomTasksQuery } from './query/getRandomTasksQuery';
 import { IdTaskParam } from './query/IdTaskParam';
 
-import { createParamDecorator } from '@nestjs/swagger/dist/decorators/helpers';
-import { isNil } from 'lodash';
-
-const initialMetadata = {
-  name: '',
-  required: true,
-};
-
-export const ApiImplicitFormData = (metadata: {
-  name: string;
-  description?: string;
-  required?: boolean;
-  type: any;
-}): MethodDecorator => {
-  const param = {
-    name: isNil(metadata.name) ? initialMetadata.name : metadata.name,
-    in: 'formData',
-    description: metadata.description || '',
-    required: metadata.required || false,
-    type: metadata.type,
-  };
-  return createParamDecorator(param, initialMetadata);
-};
-
-@ApiTags('api/task')
+@ApiTags('Задания')
 @Controller('/api/task')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TasksController {
@@ -72,7 +43,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Создать или обновить задание' })
   @ApiResponse({ status: 200, type: TaskIncludeMarkersIncludeDictionaryEntity })
   @ApiConsumes('multipart/form-data')
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @UseInterceptors(FileInterceptor('img'))
@@ -127,7 +98,7 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Пометит задание на удаление' })
   @ApiResponse({ status: 200, type: TaskIncludeMarkersIncludeDictionaryEntity })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Delete(':id')
@@ -137,7 +108,7 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Увеличить счетчик прохождений' })
   @ApiResponse({ status: 200, type: String })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Patch('/passed/:id')

@@ -20,7 +20,7 @@ export class GetRandomTasksQuery {
   @Type(() => Number)
   @IsInt({ message: 'limit должен быть числом' })
   @Min(1)
-  limit!: number;
+  limit: number;
 
   @ApiProperty({
     example: '56',
@@ -32,5 +32,5 @@ export class GetRandomTasksQuery {
   @Type(() => Number)
   @IsInt({ message: 'not_id должен быть числом' })
   @Min(1)
-  not_id!: number;
+  not_id?: number;
 }

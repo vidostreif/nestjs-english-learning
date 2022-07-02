@@ -9,8 +9,6 @@ import {
   Res,
   UseGuards,
   Req,
-  UseInterceptors,
-  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -56,7 +54,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Получить всех пользователей' })
   @ApiResponse({ status: 200, type: [UserIncludeRoleEntity] })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Get()
@@ -114,7 +112,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Получить пользователя по id' })
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Get(':id')
@@ -124,7 +122,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Обновить данные пользователя' })
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Patch(':id')
@@ -137,7 +135,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Пометить на удаление пользователя' })
   @ApiResponse({ status: 200, type: UserIncludeRoleEntity })
-  @ApiBearerAuth()
+  @ApiBearerAuth('administrator')
   @Roles('administrator')
   @UseGuards(AuthorizationGuard)
   @Delete(':id')

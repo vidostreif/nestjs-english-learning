@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppService } from './app.service';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { TasksModule } from './tasks/tasks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { TaskRatingModule } from './task-rating/task-rating.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { join } from 'path';
     UsersModule,
     PrismaModule,
     TasksModule,
+    TaskRatingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

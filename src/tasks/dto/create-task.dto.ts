@@ -1,21 +1,15 @@
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
   IsInt,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength,
-  ValidateNested,
 } from 'class-validator';
 import { plainToClass, Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { HttpException, HttpStatus } from '@nestjs/common';
 
 class DictionaryDTO {
   @ApiProperty({ example: 'table', description: 'Текст' })
@@ -46,6 +40,7 @@ class MarkerDTO {
   @IsInt()
   @IsNotEmpty()
   @Min(0)
+  @Max(100)
   left: number;
 
   @ApiProperty({
@@ -59,6 +54,7 @@ class MarkerDTO {
   @IsInt()
   @IsNotEmpty()
   @Min(0)
+  @Max(100)
   top: number;
 
   @ApiProperty()

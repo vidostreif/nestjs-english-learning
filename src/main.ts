@@ -21,7 +21,26 @@ async function bootstrap() {
       },
       'refreshToken',
     )
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        description: 'JWT Authorization for administrator',
+        type: 'http',
+        in: 'header',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'administrator',
+    )
+    .addBearerAuth(
+      {
+        description: 'JWT Authorization for all',
+        type: 'http',
+        in: 'header',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'all',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);

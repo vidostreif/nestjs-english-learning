@@ -1,4 +1,4 @@
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Dictionary, Task } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 import {

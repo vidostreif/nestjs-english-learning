@@ -2,9 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
-const default_limit = 10;
-const default_page = 1;
-
 export enum sortEnum {
   newFirst = 'newFirst',
   popularFirst = 'popularFirst',
@@ -14,10 +11,15 @@ export enum sortEnum {
   lowRatedFirst = 'lowRatedFirst',
 }
 
+const default_limit = 10;
+const default_page = 1;
+const default_sort = sortEnum.newFirst;
+
 export class GetTasksQuery {
-  constructor(limit = default_limit, page = default_page) {
+  constructor(limit = default_limit, page = default_page, sort = default_sort) {
     this.limit = limit;
     this.page = page;
+    this.sort = sort;
   }
 
   @ApiProperty({
@@ -32,7 +34,7 @@ export class GetTasksQuery {
   @Type(() => Number)
   @IsInt({ message: 'limit должен быть числом' })
   @Min(1)
-  limit!: number;
+  limit?: number;
 
   @ApiProperty({
     example: '2',
@@ -46,7 +48,7 @@ export class GetTasksQuery {
   @Type(() => Number)
   @IsInt({ message: 'page должен быть числом' })
   @Min(1)
-  page!: number;
+  page?: number;
 
   @ApiProperty({
     example: '3',
@@ -67,16 +69,17 @@ export class GetTasksQuery {
   })
   @Min(1, { each: true })
   @Max(5, { each: true })
-  complexity!: number | number[];
+  complexity?: number | number[];
 
   @ApiProperty({
     example: sortEnum.newFirst,
     description: 'Сортировка',
     enum: sortEnum,
     required: false,
+    default: sortEnum.newFirst,
   })
   @IsOptional()
   // @Type(() => String)
   @IsEnum(sortEnum, { message: 'sort не из списка сортировок' })
-  sort!: sortEnum;
+  sort?: sortEnum;
 }
