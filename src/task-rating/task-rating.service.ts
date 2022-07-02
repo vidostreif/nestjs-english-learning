@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { TaskRating } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 // import { CreateTaskRatingDto } from './dto/create-task-rating.dto';
-import { UpdateTaskRatingDto } from './dto/update-task-rating.dto';
+// import { UpdateTaskRatingDto } from './dto/update-task-rating.dto';
 import { GetTasksRatingsQuery } from './query/GetTasksRatingsQuery';
 
 @Injectable()
 export class TaskRatingService {
   constructor(private prismaClient: PrismaService) {}
 
-  async create(
+  async createOrUpdate(
     userId: number,
     taskId: number,
     rating: number,
@@ -43,19 +44,78 @@ export class TaskRatingService {
     return rating;
   }
 
-  findAll({ id, taskId, userId }: GetTasksRatingsQuery) {
-    return `This action returns all taskRating`;
+  async findAll({
+    taskId,
+    userId,
+  }: GetTasksRatingsQuery): Promise<Array<TaskRating>> {
+    const where: any = {};
+    if (userId) {
+      where.userId = userId;
+    }
+
+    if (taskId) {
+      where.taskId = taskId;
+    }
+
+    return await this.prismaClient.taskRating.findMany({
+      where,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} taskRating`;
+  async findOneForUser(userId: number, taskId: number): Promise<TaskRating> {
+    if (!taskId) {
+      throw new Error('Не задан ID задания');
+    }
+
+    if (!userId) {
+      throw new Error('Не задан ID пользователя');
+    }
+
+    const user = await this.prismaClient.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('Пользователь не найден');
+    }
+
+    const task = await this.prismaClient.task.findFirst({
+      where: { id: taskId },
+    });
+
+    if (!task) {
+      throw new Error('Задание не найдено');
+    }
+
+    return await this.prismaClient.taskRating.findFirst({
+      where: { userId, taskId },
+    });
   }
 
-  update(id: number, updateTaskRatingDto: UpdateTaskRatingDto) {
-    return `This action updates a #${id} taskRating`;
-  }
+  async remove(userId: number, taskId: number) {
+    const user = await this.prismaClient.user.findFirst({
+      where: { id: userId },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} taskRating`;
+    if (!user) {
+      throw new Error('Пользователь не найден');
+    }
+
+    const task = await this.prismaClient.task.findFirst({
+      where: { id: taskId },
+    });
+
+    if (!task) {
+      throw new Error('Задание не найдено');
+    }
+
+    return await this.prismaClient.taskRating.delete({
+      where: {
+        userId_taskId: {
+          userId: userId,
+          taskId: taskId,
+        },
+      },
+    });
   }
 }
