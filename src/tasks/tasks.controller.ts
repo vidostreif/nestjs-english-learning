@@ -35,7 +35,7 @@ import { GetRandomTasksQuery } from './query/getRandomTasksQuery';
 import { IdTaskParam } from './query/IdTaskParam';
 
 @ApiTags('Задания')
-@Controller('/api/task')
+@Controller('/api/tasks')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
@@ -54,13 +54,25 @@ export class TasksController {
     file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<TaskIncludeMarkersIncludeDictionaryEntity> {
-    console.log(file);
-
     const userId = req.user.id;
 
     return new TaskIncludeMarkersIncludeDictionaryEntity(
       await this.tasksService.createOrUpdate(+userId, file, createTaskDto),
     );
+  }
+
+  @ApiOperation({ summary: 'Получить случайный список заданий' })
+  @ApiResponse({
+    status: 200,
+    type: [TaskIncludeMarkersIncludeDictionaryEntity],
+  })
+  @Get('/random')
+  async findRandom(@Query() queryParams: GetRandomTasksQuery) {
+    const tasks = (await this.tasksService.findRandom(
+      queryParams,
+    )) as TaskIncludeMarkersIncludeDictionaryEntity[];
+
+    return tasks;
   }
 
   @ApiOperation({ summary: 'Получить список заданий по параметрам' })
@@ -70,21 +82,11 @@ export class TasksController {
   })
   @Get()
   async findAll(@Query() queryParams: GetTasksQuery) {
-    return new TaskIncludeRatingEntity(
-      await this.tasksService.findAll(queryParams),
-    );
-  }
+    const tasks = (await this.tasksService.findAll(
+      queryParams,
+    )) as TaskIncludeRatingEntity[];
 
-  @ApiOperation({ summary: 'Получить случайный список заданий' })
-  @ApiResponse({
-    status: 200,
-    type: [TaskIncludeRatingEntity],
-  })
-  @Get('/random')
-  async findRandom(@Query() queryParams: GetRandomTasksQuery) {
-    return new TaskIncludeRatingEntity(
-      await this.tasksService.findRandom(queryParams),
-    );
+    return tasks;
   }
 
   @ApiOperation({ summary: 'Получить задание по id' })

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -43,7 +43,11 @@ export class TasksService {
       });
 
       if (!task) {
-        throw new Error(`Не удалось найти задание по ID ${id}`);
+        // throw new Error(`Не удалось найти задание по ID ${id}`);
+        throw new HttpException(
+          `Не удалось найти задание по ID ${id}`,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       task.complexity = complexity;
@@ -190,9 +194,12 @@ export class TasksService {
           "task"."numberOfPasses",
           "task"."complexity",
           "task"."createdAt",
-          "task"."updatedAt"
+          "task"."updatedAt",
+        AVG("taskRatings"."rating") AS "rating"
         FROM "tasks" AS "task"
+          LEFT OUTER JOIN "taskRatings" AS "taskRatings" ON "task"."id" = "taskRatings"."taskId" 
         ${WHERE}
+        GROUP BY "task"."id"
         ORDER BY random()
         LIMIT ${limit};`);
 
@@ -201,7 +208,8 @@ export class TasksService {
 
   async findOne(id: number): Promise<TaskIncludeMarkersIncludeDictionary> {
     if (!id) {
-      throw new Error('Не задан ID');
+      // throw new Error('Не задан ID');
+      throw new HttpException('Не задан ID', HttpStatus.BAD_REQUEST);
     }
 
     const resu = await this.prismaClient.task.findFirst({
@@ -216,7 +224,8 @@ export class TasksService {
 
   async remove(id: number) {
     if (!id) {
-      throw new Error('Не задан ID');
+      // throw new Error('Не задан ID');
+      throw new HttpException('Не задан ID', HttpStatus.BAD_REQUEST);
     }
 
     await this.prismaClient.task.update({
@@ -234,7 +243,8 @@ export class TasksService {
   // увеличение счетчика прохождения задания
   async wasPassed(id: number) {
     if (!id) {
-      throw new Error('Не задан ID задания');
+      // throw new Error('Не задан ID задания');
+      throw new HttpException('Не задан ID задания', HttpStatus.BAD_REQUEST);
     }
 
     await this.prismaClient.task.update({
@@ -247,34 +257,39 @@ export class TasksService {
 
   // сохранение новой картинки
   private async saveImg(img: { buffer: sharp.SharpOptions }) {
-    const newUuid = v4();
-    const fileName = newUuid + '.webp';
-    const imgPath = path.resolve(__dirname, '..', 'static');
-    const imgPathAll = path.resolve(imgPath, fileName);
-    if (!fs.existsSync(imgPath)) {
-      fs.mkdirSync(imgPath, { recursive: true });
+    try {
+      const newUuid = v4();
+      const fileName = newUuid + '.webp';
+      const imgPath = path.resolve(__dirname, '../../..', 'static');
+      const imgPathAll = path.resolve(imgPath, fileName);
+      if (!fs.existsSync(imgPath)) {
+        fs.mkdirSync(imgPath, { recursive: true });
+      }
+      const imgPathMini = path.resolve(imgPath, 'mini_' + fileName);
+
+      await sharp(img.buffer).toFile(imgPathAll);
+      // сохраняем миниатюру
+      await sharp(img.buffer).resize(350).toFile(imgPathMini);
+
+      return fileName;
+    } catch (error) {
+      throw new HttpException(
+        'Не удалось сохранить картинки',
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    const imgPathMini = path.resolve(imgPath, 'mini_' + fileName);
-
-    console.log(img);
-
-    await sharp(img.buffer).toFile(imgPathAll);
-    // сохраняем миниатюру
-    await sharp(img.buffer).resize(350).toFile(imgPathMini);
-
-    return fileName;
   }
 
   // удаление старой картинки
   private async delImg(imgName: string) {
-    const dirPath = path.resolve(__dirname, '..', 'static');
+    const dirPath = path.resolve(__dirname, '../../..', 'static');
     // основную
     fs.unlink(path.resolve(dirPath, imgName), (err) => {
-      if (err) throw err;
+      if (err) console.log(err);
     });
     // миниатюру
     fs.unlink(path.resolve(dirPath, 'mini_' + imgName), (err) => {
-      if (err) throw err;
+      if (err) console.log(err);
     });
   }
 }

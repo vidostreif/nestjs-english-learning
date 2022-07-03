@@ -34,11 +34,6 @@ export class AuthorizationGuard implements CanActivate {
         );
       }
 
-      // если роли не указаны или в списке есть all, то разрешаем проход
-      if (requiredRoles.length === 0 || requiredRoles.includes('all')) {
-        return true;
-      }
-
       const authorizationHeader = req.headers.authorization;
       if (!authorizationHeader) {
         throw new UnauthorizedException(
@@ -59,8 +54,13 @@ export class AuthorizationGuard implements CanActivate {
       const user = userData as UserIncludeRole;
       req.user = user;
 
-      // проверяем, совпадает роль пользователя с ролью, которую указали в декораторе
-      return requiredRoles.includes(user.userRole.name);
+      // если роли не указаны или в списке есть all, то разрешаем проход
+      if (requiredRoles.length === 0 || requiredRoles.includes('all')) {
+        return true;
+      } else {
+        // проверяем, совпадает роль пользователя с ролью, которую указали в декораторе
+        return requiredRoles.includes(user.userRole.name);
+      }
     } catch (error) {
       throw error;
     }

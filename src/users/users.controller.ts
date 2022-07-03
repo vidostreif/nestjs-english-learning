@@ -9,6 +9,7 @@ import {
   Res,
   UseGuards,
   Req,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -83,7 +84,7 @@ export class UsersController {
     await this.userService.logout(refreshToken);
     res.clearCookie('refreshToken');
 
-    return res.status(200);
+    return res.status(HttpStatus.OK).send();
   }
 
   @ApiOperation({ summary: 'Активировать пользователя' })
