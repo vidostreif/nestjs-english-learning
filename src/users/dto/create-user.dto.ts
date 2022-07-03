@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, Length } from 'class-validator';
-import { IsHasUppercase } from 'src/validators/isHasUppercase';
+import { IsHasUppercase } from '../../validators/is-has-uppercase';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'иван', description: 'Наименование пользователя' })

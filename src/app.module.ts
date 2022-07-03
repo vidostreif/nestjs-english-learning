@@ -11,10 +11,14 @@ import { TasksModule } from './tasks/tasks.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TaskRatingModule } from './task-rating/task-rating.module';
+import { validationSchema } from './validators/env-validator';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      validationSchema,
+    }),
+
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

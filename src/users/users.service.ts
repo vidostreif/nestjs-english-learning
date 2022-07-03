@@ -15,7 +15,7 @@ import {
 } from './entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { UserIncludeRole, userIncludeRole } from '../prisma/prisma.dto';
 import { PrismaService } from '../prisma/prisma.service';
 

@@ -1,7 +1,7 @@
 // import { UserRole, User as UserPrisma } from '@prisma/client';
 // import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserIncludeRole } from 'src/prisma/prisma.dto';
+import { UserIncludeRole } from '../../prisma/prisma.dto';
 
 export class UserIncludeRoleEntity implements UserIncludeRole {
   constructor(partial: Partial<UserIncludeRoleEntity>) {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { AuthorizationGuard } from './authorization.guard';
 // import { IsAuthorized } from './isAuthorized.guard';
 import { AuthService } from './auth.service';

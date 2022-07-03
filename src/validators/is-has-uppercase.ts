@@ -3,7 +3,7 @@ import {
   ValidationOptions,
   ValidationArguments,
 } from 'class-validator';
-import Validator from './validatHelper';
+import Validator from './validat-helper';
 
 export function IsHasUppercase(
   // property?: string,
