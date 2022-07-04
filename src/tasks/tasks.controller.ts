@@ -35,7 +35,7 @@ import { GetRandomTasksQuery } from './query/getRandomTasksQuery';
 import { IdTaskParam } from './query/IdTaskParam';
 
 @ApiTags('Задания')
-@Controller('/api/tasks')
+@Controller('tasks')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}

@@ -12,6 +12,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TaskRatingModule } from './task-rating/task-rating.module';
 import { validationSchema } from './validators/env-validator';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -35,6 +36,28 @@ import { validationSchema } from './validators/env-validator';
       rootPath: join(__dirname, '../..', 'static'),
       exclude: ['/api*'],
     }),
+
+    RouterModule.register([
+      {
+        path: '/api',
+        module: AppModule,
+        children: [
+          {
+            path: '/',
+            module: UsersModule,
+          },
+          {
+            path: '/',
+            module: TasksModule,
+          },
+          {
+            path: '/',
+            module: TaskRatingModule,
+          },
+        ],
+      },
+    ]),
+
     AuthModule,
     UsersModule,
     PrismaModule,

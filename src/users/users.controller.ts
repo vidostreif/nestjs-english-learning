@@ -35,7 +35,7 @@ import { LoginDto } from './dto/login.dto';
 const maxAge = 2592000000; // один месяц
 
 @ApiTags('Пользователи')
-@Controller('api/users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 

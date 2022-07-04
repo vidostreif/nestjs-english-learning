@@ -25,7 +25,7 @@ import { GetTasksRatingsQuery } from './query/GetTasksRatingsQuery';
 import { TaskId_TaskRating_Param } from './query/taskId-taskRating-param';
 
 @ApiTags('Рейтинг заданий')
-@Controller('/api/tasks_ratings')
+@Controller('tasks_ratings')
 export class TaskRatingController {
   constructor(private readonly taskRatingService: TaskRatingService) {}
 
