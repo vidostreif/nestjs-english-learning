@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, Length } from 'class-validator';
+import { IsHasLowercase } from '../../validators/is-has-lowercase';
+import { IsHasNumeric } from '../../validators/is-has-numeric';
+import { IsHasSpecial } from '../../validators/is-has-special';
 import { IsHasUppercase } from '../../validators/is-has-uppercase';
 
 export class CreateUserDto {
@@ -25,6 +28,15 @@ export class CreateUserDto {
   })
   @IsHasUppercase({
     message: 'В пароле должена быть заглавная буква',
+  })
+  @IsHasLowercase({
+    message: 'В пароле должена быть строчная буква',
+  })
+  @IsHasNumeric({
+    message: 'В пароле должена быть цифра',
+  })
+  @IsHasSpecial({
+    message: 'В пароле должен быть специальный символ',
   })
   password: string;
 }
